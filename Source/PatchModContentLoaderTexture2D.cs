@@ -14,8 +14,6 @@ namespace HighQualityTextures
     {
         static bool Prefix(string filePath, ref Texture2D __result)
         {
-            Log.Warning("Load: " + filePath);
-
             Texture2D texture2D = null;
             if (File.Exists(filePath))
             {
