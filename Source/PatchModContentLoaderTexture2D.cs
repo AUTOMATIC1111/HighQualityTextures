@@ -1,4 +1,5 @@
-﻿using Harmony;
+﻿using HarmonyLib;
+using RimWorld.IO;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -21,7 +22,7 @@ namespace HighQualityTextures
         private const uint DDPF_LUMINANCE = 0x00020000;
         private const uint DDPF_NORMAL = 0x80000000;
 
-        private static string error;
+        public static string error;
 
         // DDS Texture loader inspired by
         // http://answers.unity3d.com/questions/555984/can-you-load-dds-textures-during-runtime.html#answer-707772
@@ -215,14 +216,14 @@ namespace HighQualityTextures
         }
     }
 
-    [HarmonyPatch(typeof(ModContentLoader<Texture2D>), "LoadPNG", new Type[] { typeof(string) }), StaticConstructorOnStartup]
+    [HarmonyPatch(typeof(ModContentLoader<Texture2D>), "LoadTexture", new Type[] { typeof(VirtualFile) }), StaticConstructorOnStartup]
     class PatchModContentLoaderTexture2D
     {
-        static bool Prefix(string filePath, ref Texture2D __result)
+        static bool Prefix(VirtualFile file, ref Texture2D __result)
         {
             Texture2D texture2D = null;
-            
 
+            string filePath = file.FullPath;
             string ddsPath = Path.ChangeExtension(filePath, ".dds");
             if (File.Exists(ddsPath))
             {
@@ -233,7 +234,7 @@ namespace HighQualityTextures
             }
             else if (File.Exists(filePath))
             {
-                byte[] data = File.ReadAllBytes(filePath);
+                byte[] data = file.ReadAllBytes();
                 texture2D = new Texture2D(2, 2, TextureFormat.Alpha8, true);
                 texture2D.LoadImage(data);
                 texture2D.name = Path.GetFileNameWithoutExtension(filePath);
@@ -241,8 +242,12 @@ namespace HighQualityTextures
                 texture2D.Apply(true, true);
             }
 
-            __result = texture2D;
-            return false;
+            if (texture2D != null) {
+                __result = texture2D;
+                return false;
+            }
+
+            return true;
         }
     }
 }

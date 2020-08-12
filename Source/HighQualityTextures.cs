@@ -1,4 +1,4 @@
-﻿using Harmony;
+﻿using HarmonyLib;
 using RimWorld;
 using System.Collections.Generic;
 using System.IO;
@@ -11,7 +11,7 @@ namespace HighQualityTextures
     public class HighQualityTextures :Mod
     {
         public HighQualityTextures(ModContentPack pack) :base(pack) {
-            var harmony = HarmonyInstance.Create("com.github.automatic1111.highqualitytextures");
+            var harmony = new Harmony("com.github.automatic1111.highqualitytextures");
             harmony.PatchAll(Assembly.GetExecutingAssembly());
         }   
     }
